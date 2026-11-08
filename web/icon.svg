@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Web Apps">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g)"/>
+  <g transform="translate(8 8) scale(2)" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.9298 8C20.9298 7.29 20.5498 6.63 19.9298 6.27L12.9998 2.27C12.3798 1.91 11.6198 1.91 10.9998 2.27L4.06982 6.27C3.44982 6.63 3.06982 7.29 3.06982 8L3.06982 16C3.06982 16.71 3.44982 17.37 4.06982 17.73L10.9998 21.73C11.6198 22.09 12.3798 22.09 12.9998 21.73L19.9298 17.73C20.5398 17.37 20.9298 16.71 20.9298 16L20.9298 8Z"/>
+    <path d="M11.9999 21.96L11.9999 12L3.42993 7.04999"/>
+    <path d="M0 0L9.74926 0" transform="matrix(-0.865707,0.500552,-0.500552,-0.865707,20.4398,7.12)"/>
+    <path d="M0 0L4.92796 0" transform="matrix(-0.866488,-0.499197,0.499197,-0.866488,16.3398,9.41995)"/>
+  </g>
+</svg>

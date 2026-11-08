@@ -1,0 +1,76 @@
+{
+  "name": "dsh-web-app",
+  "version": "0.3.0",
+  "description": "在 DSH 里安装并运行静态 Web 应用：左侧「应用」入口、内置套件（创作/工具/复古游戏）、上传 zip、主区内嵌。",
+  "type": "module",
+  "main": "lib/host.js",
+  "icon": "web/icon.svg",
+  "exports": {
+    ".": "./lib/host.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "web",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "sideEffects": [
+    "./lib/client.js"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
+    },
+    "compatibility": {
+      "dshReleases": {
+        "0.2.2-rc.1+": "compatible"
+      }
+    }
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.2-rc.1 <0.3.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1 <5",
+    "react": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "web-app",
+    "iframe"
+  ],
+  "author": "BAISD007",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BAISD007/dsh-web-app.git"
+  },
+  "homepage": "https://github.com/BAISD007/dsh-web-app#readme",
+  "bugs": {
+    "url": "https://github.com/BAISD007/dsh-web-app/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
+}

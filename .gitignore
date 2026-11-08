@@ -1,0 +1,15 @@
+# 依赖与临时目录
+node_modules/
+.tmp-npm-cache/
+.research/
+*.log
+debug.log
+
+# 本地参考截图（不进仓库）
+页面示例.png
+页面示例2.png
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini

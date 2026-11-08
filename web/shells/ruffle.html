@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ruffle · Flash 播放器</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: #17181a; color: #e8e8e8;
+    font-family: "MiSans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  #stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  #stage ruffle-player { width: 100%; height: 100%; }
+  #bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-top: 1px solid #2c2d30; font-size: 12px; color: #9aa0a6; }
+  #bar .grow { flex: 1; }
+  #bar button { appearance: none; border: 1px solid #3a3b3f; background: #222326; color: #e8e8e8;
+    border-radius: 7px; padding: 5px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+  #bar button:hover { border-color: #4a4c52; }
+  #drop { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; margin: 24px; border: 1.5px dashed #3a3b3f; border-radius: 18px; cursor: pointer;
+    text-align: center; padding: 32px; transition: border-color .15s ease, background .15s ease; }
+  #drop:hover, #drop.over { border-color: #4d6bfe; background: rgba(77, 107, 254, .07); }
+  #drop[hidden] { display: none; }
+  .badge { font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: #8fa8ff; background: rgba(77, 107, 254, .16); padding: 3px 9px; border-radius: 999px; }
+  #drop h1 { margin: 6px 0 0; font-size: 20px; font-weight: 600; }
+  #drop p { margin: 0; font-size: 12.5px; line-height: 20px; color: #9aa0a6; max-width: 460px; }
+</style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div id="bar" hidden>
+    <span id="file-name"></span>
+    <div class="grow"></div>
+    <button id="pick" type="button">换个 .swf</button>
+  </div>
+  <div id="drop">
+    <div class="badge">Ruffle</div>
+    <h1>把 .swf 拖到这里</h1>
+    <p>也可以点击任意位置选择文件。文件只在本机内存里播放，不会上传到任何地方。</p>
+  </div>
+  <input id="file" type="file" accept=".swf,application/x-shockwave-flash" hidden />
+  <script src="ruffle.js"></script>
+  <script>
+  (function () {
+    var stage = document.getElementById('stage')
+    var drop = document.getElementById('drop')
+    var bar = document.getElementById('bar')
+    var nameEl = document.getElementById('file-name')
+    var fileInput = document.getElementById('file')
+    var pickBtn = document.getElementById('pick')
+    var objectUrl = null
+    var player = null
+
+    function ensurePlayer() {
+      if (player) return player
+      window.RufflePlayer = window.RufflePlayer || {}
+      var ruffle = typeof window.RufflePlayer.newest === 'function' ? window.RufflePlayer.newest() : null
+      if (!ruffle) {
+        drop.querySelector('p').textContent = 'Ruffle 未能加载，请重新安装应用。'
+        return null
+      }
+      player = ruffle.createPlayer()
+      player.style.width = '100%'
+      player.style.height = '100%'
+      stage.appendChild(player)
+      return player
+    }
+
+    function play(file) {
+      if (!file) return
+      if (!/\.swf$/i.test(file.name)) {
+        nameEl && (nameEl.textContent = '请选择 .swf 文件')
+        return
+      }
+      if (!ensurePlayer()) return
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+      objectUrl = URL.createObjectURL(file)
+      nameEl.textContent = file.name
+      drop.hidden = true
+      bar.hidden = false
+      try {
+        player.ruffle().load(objectUrl)
+      } catch (err) {
+        console.error('[ruffle] load failed', err)
+      }
+    }
+
+    function choose() { fileInput.click() }
+
+    drop.addEventListener('click', choose)
+    pickBtn.addEventListener('click', choose)
+    fileInput.addEventListener('change', function () {
+      play(fileInput.files && fileInput.files[0])
+      fileInput.value = ''
+    })
+
+    ;['dragenter', 'dragover'].forEach(function (type) {
+      window.addEventListener(type, function (event) {
+        event.preventDefault()
+        drop.classList.add('over')
+      })
+    })
+    ;['dragleave', 'drop'].forEach(function (type) {
+      window.addEventListener(type, function (event) {
+        event.preventDefault()
+        if (type === 'dragleave' && event.relatedTarget) return
+        drop.classList.remove('over')
+      })
+    })
+    window.addEventListener('drop', function (event) {
+      var file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]
+      if (file) play(file)
+    })
+  })()
+  </script>
+</body>
+</html>

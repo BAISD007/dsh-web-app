@@ -1,0 +1,5 @@
+# 统一换行，避免 Windows 上产生 CRLF 噪声
+* text=auto eol=lf
+*.png binary
+*.zip binary
+*.svg text eol=lf
