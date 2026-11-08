@@ -1,5 +1,8 @@
 # dsh-web-app
 
+[![npm version](https://img.shields.io/npm/v/dsh-web-app.svg)](https://www.npmjs.com/package/dsh-web-app)
+[![license](https://img.shields.io/npm/l/dsh-web-app.svg)](./LICENSE)
+
 在 DeepSeek Harness（DSH）里**安装并运行静态 Web 应用**的插件：
 
 - 左侧导航新增「**应用**」入口；
@@ -166,3 +169,36 @@ cmd /c rmdir "F:\.dsh\profiles\desktop\node_modules\dsh-web-app"
 - ✅ 3 个内置套件：版本检查 + 一键安装/更新（GitHub Releases 静态包，自动识别入口，支持内置壳页）
 - ✅ 「打开目录」：调用系统文件管理器定位 `apps/<id>/`
 - ⏳ 独立 origin 隔离、权限桥（文件打开/保存）、上传分包、压缩传输（gzip/brotli）
+
+---
+
+## 发布（维护者）
+
+- npm：<https://www.npmjs.com/package/dsh-web-app>
+- GitHub：`https://github.com/BAISD007/dsh-web-app`（本地仓库已初始化，`origin` 已配好）
+
+首次推到 GitHub（需要一次 `gh auth login`）：
+
+```powershell
+gh auth login
+gh repo create BAISD007/dsh-web-app --public --source . --remote origin --push
+```
+
+之后日常：
+
+```powershell
+git add -A && git commit -m "..." && git push
+```
+
+发版到 npm：
+
+```powershell
+npm version patch        # 或 minor / major
+npm publish
+```
+
+> 本机 `~/.npmrc` 的默认 registry 是 npmmirror（只读镜像），所以 `package.json` 里用
+> `publishConfig.registry = https://registry.npmjs.org/` 固定发布地址；手动发布时也可以显式
+> `npm publish --registry=https://registry.npmjs.org`。
+> npm 11.15+ 对新包有「processing / staged」阶段：`npm publish` 返回成功后再等 1–2 分钟，
+> `npm view dsh-web-app version` 才会看到新版本。
