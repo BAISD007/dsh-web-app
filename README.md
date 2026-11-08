@@ -10,7 +10,19 @@
 - 「打开」在主区用同源 `iframe` 承载 Web 应用（P0 取舍，见下）；
 - 静态托管、解压、路径校验都在 Host 半身完成，浏览器半身只负责 UI。
 
-> 当前版本 **0.3.0**：新增 3 个内置套件（共 19 个应用）、「打开安装目录」、通用套件目录；安全隔离（独立 origin、权限、CSP）仍在 P1。
+> 当前版本 **0.3.1**：3 个内置套件（共 19 个应用）、「打开安装目录」、浅色/深色主题下的卡片对比度修正；安全隔离（独立 origin、权限、CSP）仍在 P1。
+
+---
+
+## 界面
+
+应用库：已安装应用 + 套件入口（卡片上有应用数 / 已安装数 / 可更新数）：
+
+![应用库：已安装应用与套件卡片](https://raw.githubusercontent.com/BAISD007/dsh-web-app/main/docs/screenshots/apps.png)
+
+套件子页：点「查看套件」进入，只列这个套件里还没安装的应用，一键安装：
+
+![创作套件子页](https://raw.githubusercontent.com/BAISD007/dsh-web-app/main/docs/screenshots/suite-artcraft.png)
 
 ---
 
@@ -168,6 +180,7 @@ cmd /c rmdir "F:\.dsh\profiles\desktop\node_modules\dsh-web-app"
 - ✅ 侧边栏「应用」入口 + 主区应用库页
 - ✅ 3 个内置套件：版本检查 + 一键安装/更新（GitHub Releases 静态包，自动识别入口，支持内置壳页）
 - ✅ 「打开目录」：调用系统文件管理器定位 `apps/<id>/`
+- ✅ 浅色 / 深色主题适配：卡片边框走 DSH 主题 token（`border-l2` + 轻阴影），两种主题下都清晰
 - ⏳ 独立 origin 隔离、权限桥（文件打开/保存）、上传分包、压缩传输（gzip/brotli）
 
 ---
