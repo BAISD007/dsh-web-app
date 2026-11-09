@@ -10,7 +10,7 @@
 - 「打开」在主区用同源 `iframe` 承载 Web 应用（P0 取舍，见下）；
 - 静态托管、解压、路径校验都在 Host 半身完成，浏览器半身只负责 UI。
 
-> 当前版本 **0.3.2**：可在 DSH「插件 → 添加插件」里直接输入包名 `dsh-web-app` 安装；包含 3 个内置套件（共 19 个应用）、「打开安装目录」、浅色/深色主题适配；安全隔离（独立 origin、权限、CSP）仍在 P1。
+> 当前版本 **0.3.3**：可在 DSH「插件 → 添加插件」里直接输入包名 `dsh-web-app` 安装；包含 3 个内置套件（共 19 个应用）、「打开安装目录」、浅色/深色主题适配；文档里的路径已改成通用写法（`<DSH_HOME>` / `<本仓库>`）。安全隔离（独立 origin、权限、CSP）仍在 P1。
 
 ---
 
@@ -32,18 +32,23 @@
 
 DSH → 左侧「**插件**」→「**添加插件**」→ 输入包名 **`dsh-web-app`** → 安装源选「默认」或「npm 官方源」/「中国大陆镜像源」→ 安装。
 
-- 输入框接受这些形式：npm 包名（`dsh-web-app`，也可以带版本 `dsh-web-app@0.3.2`）、GitHub 仓库地址（`https://github.com/BAISD007/dsh-web-app` 或 `github:BAISD007/dsh-web-app`）、`.tgz` 地址，或本机插件的绝对路径。
+- 输入框接受这些形式：npm 包名（`dsh-web-app`，需要锁版本就写 `dsh-web-app@0.3.x`）、GitHub 仓库地址（`https://github.com/BAISD007/dsh-web-app` 或 `github:BAISD007/dsh-web-app`）、`.tgz` 地址，或本机插件的绝对路径。
 - 安装前会先查注册表，校验 `engines.dsh` 与 peer 依赖；装好后默认启用，没有 HMR 时会提示重启一次 DSH。
 - 已经用下面的「本地 link 安装」装过的，先在插件页「卸载」再按上面安装，否则会提示「该插件已安装」。
+
+> **路径占位符**（下文用它们代替具体路径，换台机器也能照着做）：
+> - `<DSH_HOME>`：DSH 的用户目录。默认 `~/.dsh`，Windows 上是 `%USERPROFILE%\.dsh`；如果设了 `DSH_HOME` 环境变量，就用它的值（插件自己的数据也在它下面）。
+> - `profiles/desktop`：desktop 这个 profile 的目录；用别的 profile 名时换成对应目录。
+> - `<本仓库>`：你 clone 或解压这个项目的绝对路径，放在哪里都可以。
 
 ### 手动从 npm 安装（等价，适合锁版本 / 离线）
 
 ```powershell
-# 1) 在 DSH desktop profile 目录里装依赖
-cd F:\.dsh\profiles\desktop
+# 1) 进入 DSH 的 desktop profile 目录
+cd <DSH_HOME>/profiles/desktop        # 例如 ~/.dsh/profiles/desktop
 npm i dsh-web-app
 
-# 2) 把 "dsh-web-app" 加进 profile package.json 的 dsh.profile.bundles
+# 2) 把 "dsh-web-app" 加进同目录 package.json 的 dsh.profile.bundles
 #    形如："dsh": { "profile": { "bundles": ["dsh-web-app"] } }
 
 # 3) 重启 DSH，左侧出现「应用」
@@ -51,24 +56,30 @@ npm i dsh-web-app
 
 ### 本地开发（link 安装）
 
-已提供脚本（会备份 profile 的 `package.json`）：
+在仓库根目录运行（脚本会自动找 `<DSH_HOME>/profiles/desktop`，并备份 profile 的 `package.json`）：
 
 ```powershell
-cd F:\DSH_project\DSH_plugin\dsh-artcraft-hub
-node scripts\install-profile.mjs
+node scripts/install-profile.mjs
 # 重启 DSH 后生效；卸载用：
-# node scripts\install-profile.mjs --uninstall
+# node scripts/install-profile.mjs --uninstall
+```
+
+要装到别的 profile，用环境变量指定（PowerShell 示例）：
+
+```powershell
+$env:DSH_PROFILE_DIR = "<DSH_HOME>\profiles\<profile 名>"   # 或设 DSH_PROFILE_NAME=<profile 名>
+node scripts/install-profile.mjs
 ```
 
 <details>
 <summary>手动安装（等价步骤）</summary>
 
 1. 在 DSH 的 desktop profile 里登记依赖与 bundle。
-   编辑 `F:\...\.dsh\profiles\desktop\package.json`：
+   编辑 `<DSH_HOME>/profiles/desktop/package.json`：
 
    ```json
    "dependencies": {
-     "dsh-web-app": "link:F:/DSH_project/DSH_plugin/dsh-artcraft-hub"
+     "dsh-web-app": "link:<本仓库的绝对路径，用 / 分隔>"
    },
    "dsh": {
      "profile": {
@@ -80,7 +91,7 @@ node scripts\install-profile.mjs
 2. 让 profile 的 `node_modules` 能解析到本包（Windows 用 junction；或用 `pnpm add link:`）：
 
    ```powershell
-   cmd /c mklink /J "F:\.dsh\profiles\desktop\node_modules\dsh-web-app" "F:\DSH_project\DSH_plugin\dsh-artcraft-hub"
+   cmd /c mklink /J "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app" "<本仓库的绝对路径>"
    ```
 
 3. **重启 DSH**（插件图在启动时读取）。左侧应出现「应用」入口。
@@ -92,7 +103,7 @@ node scripts\install-profile.mjs
 删除 profile `package.json` 里的 `dsh-web-app` 两项 + 删除 junction，重启即可：
 
 ```powershell
-cmd /c rmdir "F:\.dsh\profiles\desktop\node_modules\dsh-web-app"
+cmd /c rmdir "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app"
 ```
 
 若启动异常，也可先在 `package.json` 的 `dsh.profile.bundles` 里去掉 `dsh-web-app`，再重启。
@@ -138,9 +149,7 @@ cmd /c rmdir "F:\.dsh\profiles\desktop\node_modules\dsh-web-app"
   tmp/            # 上传临时文件
 ```
 
-`DSH_HOME` 默认是 `~/.dsh`（本机为 `F:\.dsh`）。
-
-界面上的「打开目录」就是在系统文件管理器里打开 `apps/<id>/`。应用自己的 localStorage / IndexedDB 存在 DSH 渲染进程里，不在该目录；迁移时拷走整个 `web-apps` 目录即可。
+`DSH_HOME` 默认是 `~/.dsh`：Windows 上即 `%USERPROFILE%\.dsh`；可以用环境变量 `DSH_HOME` 指到别的盘或目录。界面上的「打开目录」就是在系统文件管理器里打开 `apps/<id>/`。应用自己的 localStorage / IndexedDB 存在 DSH 渲染进程里，不在该目录；迁移时拷走整个 `web-apps` 目录即可。
 
 ---
 
@@ -196,19 +205,21 @@ cmd /c rmdir "F:\.dsh\profiles\desktop\node_modules\dsh-web-app"
 ## 发布（维护者）
 
 - npm：<https://www.npmjs.com/package/dsh-web-app>
-- GitHub：`https://github.com/BAISD007/dsh-web-app`（本地仓库已初始化，`origin` 已配好）
+- GitHub：<https://github.com/BAISD007/dsh-web-app>
 
-首次推到 GitHub（需要一次 `gh auth login`）：
+以下都在仓库根目录操作。首次推到 GitHub（需要一次 `gh auth login`；仓库已存在就跳过 create）：
 
 ```powershell
 gh auth login
-gh repo create BAISD007/dsh-web-app --public --source . --remote origin --push
+gh repo create <你的用户名>/dsh-web-app --public --source . --remote origin --push
 ```
 
 之后日常：
 
 ```powershell
-git add -A && git commit -m "..." && git push
+git add -A
+git commit -m "..."
+git push && git push --tags      # 发版后记得把 tag 也推上去
 ```
 
 发版到 npm：
@@ -218,8 +229,8 @@ npm version patch        # 或 minor / major
 npm publish
 ```
 
-> 本机 `~/.npmrc` 的默认 registry 是 npmmirror（只读镜像），所以 `package.json` 里用
-> `publishConfig.registry = https://registry.npmjs.org/` 固定发布地址；手动发布时也可以显式
-> `npm publish --registry=https://registry.npmjs.org`。
+> `package.json` 里用 `publishConfig.registry = https://registry.npmjs.org/` 固定了发布地址，
+> 所以即使你的 `~/.npmrc` 默认 registry 是 npmmirror 这类只读镜像，`npm publish` 也会发到官方源；
+> 也可以显式写 `npm publish --registry=https://registry.npmjs.org`。
 > npm 11.15+ 对新包有「processing / staged」阶段：`npm publish` 返回成功后再等 1–2 分钟，
 > `npm view dsh-web-app version` 才会看到新版本。
