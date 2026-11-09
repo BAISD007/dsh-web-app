@@ -10,7 +10,7 @@
 - 「打开」在主区用同源 `iframe` 承载 Web 应用（P0 取舍，见下）；
 - 静态托管、解压、路径校验都在 Host 半身完成，浏览器半身只负责 UI。
 
-> 当前版本 **0.3.3**：可在 DSH「插件 → 添加插件」里直接输入包名 `dsh-web-app` 安装；包含 3 个内置套件（共 19 个应用）、「打开安装目录」、浅色/深色主题适配；文档里的路径已改成通用写法（`<DSH_HOME>` / `<本仓库>`）。安全隔离（独立 origin、权限、CSP）仍在 P1。
+> 当前版本 **0.4.0**：文本资源 brotli/gzip 压缩、上传小窗（应用名 + 安装位置）、应用悬浮窗、跨站写保护；包含 3 个内置套件（共 19 个应用）、「打开安装目录」、浅色/深色主题适配。安全隔离（独立 origin、权限桥）仍在 P1。
 
 ---
 
@@ -116,14 +116,16 @@ cmd /c rmdir "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app"
 
 1. 左侧点「应用」，往下找到「套件」分区（每个套件一张卡片，卡片上显示应用数 / 已安装数 / 可更新数）；
 2. 点进套件 → 对还没安装的应用点「安装」；
-3. 回到「已安装」，点「打开」在主区 iframe 里运行；「打开目录」直接在文件管理器里定位它的安装文件夹。
+3. 回到「已安装」，点「打开」在主区 iframe 里运行，或点「悬浮窗」开一个可拖动、可缩放的浮窗（边用 DSH 边看应用）；「打开目录」直接在文件管理器里定位它的安装文件夹。
 
 **上传自己的应用**
 
-1. 右上角「上传应用」；
-2. 选择一个包含 `index.html` 的 **zip**（静态站点，最大 512 MiB）；
-3. 卡片出现后点「打开」，应用在主区 iframe 中运行；
-4. 「删除」移除应用目录。
+1. 右上角「上传应用」，弹出小窗：
+   - 选一个包含 `index.html` 的 **zip**（静态站点，最大 512 MiB）；
+   - 填**应用名称**（默认取 zip 文件名）、可选的目录名；
+   - 选**安装位置**：「默认目录」或「自定义目录」（填一个绝对路径，比如 `D:\WebApps`）；
+2. 点「安装」，装好后出现在「已安装」里；
+3. 「打开」在主区运行、「悬浮窗」开浮窗、「删除」移除这个应用自己的文件夹。
 
 ### 可选的 `dsh-web-app.json`（放在 zip 根目录）
 
@@ -145,11 +147,14 @@ cmd /c rmdir "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app"
 
 ```
 <DSH_HOME>/web-apps/
-  apps/<id>/      # 解压后的静态站点 + .dsh-app-meta.json
+  apps/<id>/      # 默认安装位置：解压后的静态站点 + .dsh-app-meta.json
   tmp/            # 上传临时文件
+  roots.json      # 用户选过的自定义安装根目录（有自定义安装时才出现）
 ```
 
-`DSH_HOME` 默认是 `~/.dsh`：Windows 上即 `%USERPROFILE%\.dsh`；可以用环境变量 `DSH_HOME` 指到别的盘或目录。界面上的「打开目录」就是在系统文件管理器里打开 `apps/<id>/`。应用自己的 localStorage / IndexedDB 存在 DSH 渲染进程里，不在该目录；迁移时拷走整个 `web-apps` 目录即可。
+自定义安装的应用在 `<你选的目录>/<id>/`，同样带 `.dsh-app-meta.json`；列表里会记住这些根目录，所以「打开 / 删除」行为一致。
+
+`DSH_HOME` 默认是 `~/.dsh`：Windows 上即 `%USERPROFILE%\.dsh`；可以用环境变量 `DSH_HOME` 指到别的盘或目录。界面上的「打开目录」就是在系统文件管理器里打开应用目录。应用自己的 localStorage / IndexedDB 存在 DSH 渲染进程里，不在该目录；迁移时拷走整个 `web-apps` 目录即可（自定义安装的目录要另外拷）。
 
 ---
 
@@ -173,6 +178,7 @@ cmd /c rmdir "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app"
 
 - 应用与 DSH **同源**托管（`/web-apps/app/<id>/`），iframe 的 sandbox 保留了 `allow-same-origin`（否则应用存储会坏）。
 - 这意味着：**只安装你信任的 Web 包**。同源应用理论上可以访问 DSH 页面与接口。
+- 所有接口先过 DSH 的 `connection.requestRejection` 鉴权；写接口还额外校验 `sec-fetch-site`，来自其他站点的写请求直接 403。
 - P1 计划：应用改由独立 loopback origin 托管（`*.localhost` 子域或独立端口），iframe 去掉 `allow-same-origin`，补权限声明与 CSP；届时 ArtCraft 等可信来源可保持内嵌，未签名来源默认更强隔离。
 
 ## 内置套件（3 个 / 19 个应用）
@@ -194,11 +200,14 @@ cmd /c rmdir "<DSH_HOME>\profiles\desktop\node_modules\dsh-web-app"
 ## 已实现 / 未实现
 
 - ✅ 上传 zip、解压、路径穿越/符号链接/大小校验、列表、打开、删除、静态托管（含 Range/MIME）
-- ✅ 侧边栏「应用」入口 + 主区应用库页
+- ✅ 上传小窗：应用名称、目录名、安装位置（默认 / 自定义绝对路径）
+- ✅ 侧边栏「应用」入口 + 主区应用库页 + 应用悬浮窗（可拖动、可缩放）
 - ✅ 3 个内置套件：版本检查 + 一键安装/更新（GitHub Releases 静态包，自动识别入口，支持内置壳页）
-- ✅ 「打开目录」：调用系统文件管理器定位 `apps/<id>/`
+- ✅ 「打开目录」：调用系统文件管理器定位应用目录
+- ✅ 文本资源 brotli / gzip 压缩传输（按 `Accept-Encoding`，带内存缓存；Range 与二进制资源保持原样）
 - ✅ 浅色 / 深色主题适配：卡片边框走 DSH 主题 token（`border-l2` + 轻阴影），两种主题下都清晰
-- ⏳ 独立 origin 隔离、权限桥（文件打开/保存）、上传分包、压缩传输（gzip/brotli）
+- ✅ 写接口的 `sec-fetch-site` 跨站保护
+- ⏳ 独立 origin 隔离、权限桥（文件打开/保存）、上传分包
 
 ---
 

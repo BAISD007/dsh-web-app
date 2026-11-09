@@ -1,6 +1,6 @@
 {
   "name": "dsh-web-app",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "在 DSH 里安装并运行静态 Web 应用：左侧「应用」入口、内置套件（创作/工具/复古游戏）、上传 zip、主区内嵌。",
   "type": "module",
   "main": "lib/host.js",
